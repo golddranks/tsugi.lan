@@ -28,11 +28,7 @@ uci commit dropbear
 echo "Security config done."
 
 
-# Lan
-uci set network.lan.proto='dhcp'
-uci delete network.lan.ipaddr
-uci delete network.lan.netmask
-uci delete network.lan.ip6assign
+# Lan IPv6
 
 uci set network.lan6=interface
 uci set network.lan6.proto='dhcpv6'
@@ -42,6 +38,7 @@ uci set network.lan6.ifaceid='::2'
 # MacOS NDP+RA IPv6 address selection supports only LLA source addresses, so don't use ULA:
 uci set network.globals.ula_prefix=''
 uci commit network
+
 
 # Add lan6 to trusted zone
 uci delete firewall.cfg02dc81.network
@@ -79,8 +76,7 @@ uci commit system
 
 echo "Basic network config done."
 
-reload_config
- echo "Start installing external packages."
+echo "Start installing external packages."
 
 opkg update
 

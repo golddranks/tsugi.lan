@@ -1,6 +1,8 @@
-#!/bin/sh -eux
+#!/bin/sh -eu
 
-CURRENT_IP=${1:-192.168.1.1}
+echo "Did you run ./connect.sh, i.e. is the router connected to the LAN and internet and accessible from the current host?"
+
+CURRENT_IP=${1:-10.0.0.2}
 
 . ./secrets.sh
 
@@ -22,6 +24,6 @@ scp ../certs/cert/tsugi.lan.key "root@${CURRENT_IP}:/etc/ssl/tsugi.lan.key"
 scp ../certs/cert/tsugi.lan.chain.pem "root@${CURRENT_IP}:/etc/ssl/tsugi.lan.chain.pem"
 
 # Sending the install scripts
-scp remote1.sh "root@${CURRENT_IP}:"
+scp remote.sh "root@${CURRENT_IP}:"
 scp ../pubkeys/authorized_keys_strict "root@${CURRENT_IP}:"
-ssh "root@${CURRENT_IP}" "./remote1.sh '$ROOT_PW' '$SSH_PUBKEY' '$WIFI_PW'"
+ssh "root@${CURRENT_IP}" "./remote.sh '$ROOT_PW' '$SSH_PUBKEY' '$WIFI_PW'"
