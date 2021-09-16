@@ -30,3 +30,4 @@ scp ../certs/cert/tsugi.lan.chain.pem "root@${CURRENT_IP}:/etc/ssl/tsugi.lan.cha
 scp remote.sh "root@${CURRENT_IP}:"
 scp ../pubkeys/authorized_keys_strict "root@${CURRENT_IP}:"
 ssh "root@${CURRENT_IP}" "./remote.sh '$ROOT_PW' '$SSH_PUBKEY' '$WIFI_PW'"
+ssh "root@${CURRENT_IP}" "reboot now"
