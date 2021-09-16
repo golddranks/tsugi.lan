@@ -4,6 +4,9 @@ echo "Did you run ./connect.sh, i.e. is the router connected to the LAN and inte
 
 CURRENT_IP=${1:-10.0.0.2}
 
+[ ! -d "../certs" ] && echo "Prepare ../certs directory" && exit 1
+[ ! -d "../pubkeys" ] && echo "Prepare ../pubkeys directory" && exit 1
+
 . ./secrets.sh
 
 SSH_PUBKEY=$(cat $HOME/.ssh/id_rsa.pub)
