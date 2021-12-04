@@ -82,13 +82,6 @@ opkg update
 
 echo "Updated packet list."
 
-PACKAGES=$(opkg list-upgradable | cut -f 1 -d ' ')
-if [ -n "$PACKAGES" ]; then
-    opkg upgrade "$PACKAGES"
-fi
-
-echo "Base packages upgraded"
-
 opkg install curl nano coreutils-base64 wget bind-dig tcpdump ip-full diffutils
 
 echo "Utilities installed."
