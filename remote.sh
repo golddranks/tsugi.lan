@@ -6,6 +6,16 @@ WIFI_PW=${3:?}
 
 . /etc/openwrt_release
 
+# Idempotent UCI functions
+
+function delete_uci_key () {
+	uci -q delete "$1" && echo "Deleted $1" || echo "$1 is already deleted; that's OK."
+}
+
+function rename_uci_key () {
+	uci -q show "${1}.${3}" > /dev/null && echo "${1}.${3} already exists/is renamed; that's OK." || { uci -q rename "${1}.${2}=${3}" && echo "Renamed ${1}.${2}=${3}"; }
+}
+
 echo "Setting up config on Buffalo WSR-1166DHP. OS: $DISTRIB_DESCRIPTION"
 
 # Add the host pubkey of the installer host
@@ -20,9 +30,10 @@ $ROOT_PW
 $ROOT_PW
 EOF
 
-uci set dropbear.cfg014dd4.RootPasswordAuth='off'
-uci set dropbear.cfg014dd4.PasswordAuth='off'
-uci set dropbear.cfg014dd4.Interface='lan'
+rename_uci_key dropbear cfg014dd4 lan_admin
+uci set dropbear.lan_admin.RootPasswordAuth='off'
+uci set dropbear.lan_admin.PasswordAuth='off'
+uci set dropbear.lan_admin.Interface='lan'
 uci commit dropbear
 
 echo "Security config done."
@@ -47,8 +58,8 @@ echo "Utilities installed."
 # Install nginx to support performant HTTPS admin panel
 opkg install luci-ssl-nginx
 
-uci delete nginx._lan.listen || true
-uci delete nginx._lan.uci_manage_ssl || true
+delete_uci_key nginx._lan.listen
+delete_uci_key nginx._lan.uci_manage_ssl
 uci add_list nginx._lan.listen='666 ssl default_server'
 uci add_list nginx._lan.listen='[::]:666 ssl default_server'
 uci set nginx._lan.ssl_certificate='/etc/ssl/tsugi.lan.chain.pem'
@@ -83,12 +94,12 @@ echo "WPS settings done."
 /etc/init.d/odhcpd disable
 /etc/init.d/firewall disable
 /etc/init.d/dnsmasq disable
-uci delete network.wan || true
-uci delete network.wan6 || true
+delete_uci_key network.wan
+delete_uci_key network.wan6
 
 # Vlan
 # Delete br-lan, we are going to bridge the wan port too.
-uci delete network.cfg030f15 || true
+delete_uci_key network.cfg030f15
 uci set network.br0=device
 uci set network.br0.type='bridge'
 uci set network.br0.name="br0"
@@ -118,7 +129,8 @@ uci set network.lan6.proto='dhcpv6'
 uci set network.lan6.ifaceid='::2'
 uci set network.lan6.device='br0.1'
 
-uci set firewall.cfg02dc81.network='lan lan6'
+rename_uci_key firewall cfg02dc81 lan_zone
+uci set firewall.lan_zone.network='lan lan6'
 uci commit firewall
 
 # MacOS NDP+RA IPv6 address selection supports only LLA source addresses, so don't use ULA:
@@ -148,7 +160,7 @@ uci commit wireless
 
 echo "Basic network config done."
 
-uci set dropbear.cfg014dd4.Port='222'
+uci set dropbear.lan_admin.Port='222'
 uci commit dropbear
 
 reload_config
